@@ -1,129 +1,238 @@
-export default function CarKnifesConcept() {
-  const battlePassRewards = [
-    { level: 1, reward: '10k Coins', premium: false },
-    { level: 2, reward: 'Summer Profile Background', premium: false },
-    { level: 3, reward: 'Summer Luck Case', premium: false },
-    { level: 4, reward: 'Neon Green Glow', premium: true },
-    { level: 5, reward: '3 Summer Tokens', premium: false },
-    { level: 6, reward: 'BMW M4 Summer Sunset', premium: true },
-    { level: 7, reward: 'Summer Smoke Effect', premium: false },
-    { level: 8, reward: '2 Summer Cases', premium: true },
-    { level: 9, reward: 'Golden Wheels', premium: false },
-    { level: 10, reward: 'Animated Palm Banner', premium: true },
-    { level: 11, reward: 'Lucky Open', premium: false },
-    { level: 12, reward: 'Nissan GTR Miami Edition', premium: true },
-    { level: 13, reward: '5 Summer Tokens', premium: false },
-    { level: 14, reward: 'VIP Summer Frame', premium: true },
-    { level: 15, reward: 'Brabus 6x6 Summer Edition', premium: true },
-  ];
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  const menuButtons = [
-    'Cases',
-    'Inventory',
-    'Craft',
-    'Battle Pass',
-    'Support'
-  ];
+<title>CarKnifes</title>
 
-  return (
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 via-purple-500/20 to-yellow-500/20 blur-3xl animate-pulse" />
-
-      <div className="relative z-10 p-6">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h1 className="text-5xl font-black tracking-wide">
-              CarKnifes
-            </h1>
-            <p className="text-yellow-300 text-lg mt-2">
-              ☀ Summer Season
-            </p>
-          </div>
-
-          <div className="bg-white/10 border border-white/20 rounded-2xl px-5 py-3 backdrop-blur-md">
-            <p className="text-sm text-gray-300">Premium Pass</p>
-            <p className="text-2xl font-bold text-yellow-300">169 Gems</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-          {menuButtons.map((button) => (
-            <button
-              key={button}
-              className="bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20 rounded-3xl py-5 text-lg font-bold backdrop-blur-md hover:scale-105"
-            >
-              {button}
-            </button>
-          ))}
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md mb-10">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-3xl font-black">
-                ☀ Summer Battle Pass
-              </h2>
-              <p className="text-gray-300 mt-1">
-                Complete in 3 days
-              </p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-sm text-gray-400">Season Ends In</p>
-              <p className="text-2xl font-bold text-red-400">02:13:55</p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {battlePassRewards.map((item) => (
-              <div
-                key={item.level}
-                className={`flex items-center justify-between rounded-2xl p-4 border ${
-                  item.premium
-                    ? 'bg-yellow-500/10 border-yellow-400/30'
-                    : 'bg-white/5 border-white/10'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center text-xl font-black">
-                    {item.level}
-                  </div>
-
-                  <div>
-                    <p className="text-lg font-bold">{item.reward}</p>
-                    <p className="text-sm text-gray-400">
-                      {item.premium ? 'Premium Reward' : 'Free Reward'}
-                    </p>
-                  </div>
-                </div>
-
-                <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-6 py-2 rounded-xl hover:scale-105 transition-transform">
-                  CLAIM
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-yellow-500/20 to-pink-500/20 border border-yellow-300/20 rounded-3xl p-8 backdrop-blur-md text-center">
-          <h2 className="text-4xl font-black mb-3">
-            Rolls-Royce Cullinan
-          </h2>
-          <p className="text-yellow-300 text-xl mb-4">
-            Summer Edition Craft Car
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
-            <div className="bg-black/30 px-4 py-2 rounded-xl">5 Legendary Cars</div>
-            <div className="bg-black/30 px-4 py-2 rounded-xl">Summer Tokens</div>
-            <div className="bg-black/30 px-4 py-2 rounded-xl">15% Success Chance</div>
-          </div>
-
-          <button className="bg-gradient-to-r from-pink-500 to-yellow-400 text-black font-black px-10 py-4 rounded-2xl text-xl hover:scale-105 transition-transform">
-            CRAFT NOW
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial;
 }
+
+body{
+    background:linear-gradient(-45deg,#0f0c29,#302b63,#24243e,#ff0080);
+    background-size:400% 400%;
+    animation:bg 12s ease infinite;
+    color:white;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+@keyframes bg{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+header{
+    padding:30px;
+    text-align:center;
+}
+
+header h1{
+    font-size:60px;
+    text-shadow:0 0 20px #ff00c8;
+}
+
+header p{
+    margin-top:10px;
+    font-size:22px;
+    color:#ffd000;
+}
+
+.menu{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+    margin-top:40px;
+}
+
+.btn{
+    width:220px;
+    padding:25px;
+    border:none;
+    border-radius:25px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 0 20px rgba(255,255,255,0.1);
+}
+
+.btn:hover{
+    transform:scale(1.07);
+    background:rgba(255,255,255,0.2);
+}
+
+.battlepass{
+    width:90%;
+    margin:60px auto;
+    background:rgba(255,255,255,0.08);
+    border-radius:30px;
+    padding:40px;
+    backdrop-filter:blur(15px);
+}
+
+.battlepass h2{
+    font-size:45px;
+    margin-bottom:20px;
+}
+
+.reward{
+    background:rgba(0,0,0,0.3);
+    padding:20px;
+    border-radius:20px;
+    margin-top:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.reward button{
+    background:gold;
+    border:none;
+    padding:12px 25px;
+    border-radius:15px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.craft{
+    width:90%;
+    margin:50px auto;
+    text-align:center;
+    background:rgba(255,255,255,0.08);
+    padding:50px;
+    border-radius:30px;
+    backdrop-filter:blur(15px);
+}
+
+.craft h2{
+    font-size:45px;
+}
+
+.craft p{
+    margin-top:15px;
+    font-size:22px;
+}
+
+.craft button{
+    margin-top:30px;
+    padding:18px 50px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(45deg,#ffcc00,#ff0080);
+    color:black;
+    font-size:22px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.craft button:hover{
+    transform:scale(1.08);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>CarKnifes</h1>
+    <p>☀ Summer Season</p>
+</header>
+
+<div class="menu">
+    <button class="btn">🎁 Кейсы</button>
+    <button class="btn">🚗 Инвентарь</button>
+    <button class="btn">🔧 Крафт</button>
+    <button class="btn">🏆 Battle Pass</button>
+    <button class="btn" onclick="window.open('https://t.me/KosmosHardoxxx')">📞 Поддержка</button>
+</div>
+
+<div class="battlepass">
+
+<h2>☀ Summer Battle Pass</h2>
+
+<div class="reward">
+    <div>
+        <h3>LVL 1 — 10k Coins</h3>
+        <p>Free Reward</p>
+    </div>
+
+    <button>CLAIM</button>
+</div>
+
+<div class="reward">
+    <div>
+        <h3>LVL 5 — Summer Tokens</h3>
+        <p>Premium Reward</p>
+    </div>
+
+    <button>CLAIM</button>
+</div>
+
+<div class="reward">
+    <div>
+        <h3>LVL 10 — Nissan GTR Miami Edition</h3>
+        <p>Premium Reward</p>
+    </div>
+
+    <button>CLAIM</button>
+</div>
+
+<div class="reward">
+    <div>
+        <h3>LVL 15 — Brabus 6x6 Summer</h3>
+        <p>ULTRA RARE</p>
+    </div>
+
+    <button>CLAIM</button>
+</div>
+
+</div>
+
+<div class="craft">
+
+<h2>🌴 Rolls-Royce Cullinan</h2>
+
+<p>Summer Edition</p>
+
+<p>🔧 Нужно: 5 Legendary Cars</p>
+
+<p>🎲 Шанс: 15%</p>
+
+<button onclick="craftCar()">
+CRAFT NOW
+</button>
+
+</div>
+
+<script>
+function craftCar(){
+
+    let chance = Math.random()*100;
+
+    if(chance <= 15){
+
+        alert('🔥 SUCCESS! Ты получил Rolls-Royce Cullinan Summer Edition');
+
+    }else{
+
+        alert('❌ FAILED! Машины уничтожены');
+
+    }
+
+}
+</script>
+
+</body>
+</html>
