@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Case Kingdom</title>
+<title>Case Kingdom CS</title>
 
 <style>
 body{
@@ -13,6 +13,7 @@ color:white;
 background:linear-gradient(-45deg,#0f0c29,#302b63,#ff006e,#ff8800);
 background-size:400% 400%;
 animation:bg 10s ease infinite;
+overflow-x:hidden;
 }
 
 @keyframes bg{
@@ -37,16 +38,34 @@ animation:bg 10s ease infinite;
 
 .case{background:rgba(255,255,255,.1);padding:15px;border-radius:12px;text-align:center}
 
-.result{text-align:center;font-size:24px;margin:10px;min-height:30px}
-
-.inv-item{
-display:flex;
-justify-content:space-between;
-background:rgba(0,0,0,.3);
-padding:8px;margin:5px;border-radius:8px;
+.result{
+text-align:center;
+font-size:24px;
+margin:10px;
+min-height:40px;
 }
 
-button{cursor:pointer}
+.roll-container{
+width:100%;
+overflow:hidden;
+margin-top:10px;
+border:2px solid white;
+border-radius:10px;
+}
+
+.roll{
+display:flex;
+transition:transform 3s cubic-bezier(.2,.8,.2,1);
+}
+
+.item{
+min-width:120px;
+padding:10px;
+margin:5px;
+background:rgba(0,0,0,.4);
+text-align:center;
+border-radius:10px;
+}
 
 .silver{color:silver}
 .green{color:lime}
@@ -54,6 +73,17 @@ button{cursor:pointer}
 .epic{color:#c86bff}
 .legendary{color:gold}
 .ultra{color:red}
+
+.inv-item{
+display:flex;
+justify-content:space-between;
+padding:8px;
+margin:5px;
+background:rgba(0,0,0,.3);
+border-radius:8px;
+}
+
+button{cursor:pointer}
 
 .donate{
 position:fixed;
@@ -65,13 +95,12 @@ border-radius:10px;
 font-weight:bold;
 cursor:pointer;
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="header">🎁 CASE KINGDOM</div>
+<div class="header">🎁 CASE KINGDOM CS</div>
 
 <div class="stats">
 <div>⭐ <span id="stars">1000</span></div>
@@ -85,7 +114,7 @@ cursor:pointer;
 <button onclick="show('support')">📞 Техподдержка</button>
 </div>
 
-<!-- КЕЙСЫ -->
+<!-- CASES -->
 <div id="cases" class="section active">
 
 <div class="case-grid">
@@ -106,7 +135,7 @@ cursor:pointer;
 </div>
 
 <div class="case">
-<h3>🌴 Летний</h3>
+<h3>🌴 Лето</h3>
 <button onclick="openCase(4)">699⭐</button>
 </div>
 
@@ -114,27 +143,31 @@ cursor:pointer;
 
 <div id="result" class="result"></div>
 
+<div class="roll-container">
+<div id="roll" class="roll"></div>
 </div>
 
-<!-- ИНВЕНТАРЬ -->
+</div>
+
+<!-- INVENTORY -->
 <div id="inv" class="section">
 <h2 style="text-align:center">🎒 Инвентарь</h2>
 <div id="inventory"></div>
 </div>
 
-<!-- КРАФТ -->
+<!-- CRAFT -->
 <div id="craft" class="section">
 <h2 style="text-align:center">🔧 Крафт 🔫</h2>
 <p style="text-align:center">🌊 Летний водяной автоматик</p>
 </div>
 
-<!-- ПОДДЕРЖКА -->
+<!-- SUPPORT -->
 <div id="support" class="section">
 <h2 style="text-align:center">📞 Техподдержка</h2>
 <p style="text-align:center">@KosmosHardoxxx</p>
 </div>
 
-<!-- ДОНАТ -->
+<!-- DONATE -->
 <div class="donate" onclick="donate()">💰 Донат</div>
 
 <script>
@@ -162,19 +195,19 @@ const items=[
 {name:"🍉 Арбуз",r:"ultra"}
 ];
 
-// ===== РАВНОВЕСИЕ КЕЙСОВ =====
+// ===== BALANCE =====
 function getItem(type){
 
 let r=Math.random()*100;
 
-// НОВИЧОК (до синего)
+// новичок
 if(type===1){
 if(r<65) return rand("silver");
 if(r<90) return rand("green");
 return rand("blue");
 }
 
-// СТАНДАРТ (зелёный → легендарный)
+// стандарт
 if(type===2){
 if(r<60) return rand("green");
 if(r<85) return rand("blue");
@@ -182,7 +215,7 @@ if(r<97) return rand("epic");
 return rand("legendary");
 }
 
-// ДУБАЙ (синий и выше)
+// дубай
 if(type===3){
 if(r<55) return rand("blue");
 if(r<85) return rand("epic");
@@ -190,7 +223,7 @@ if(r<97) return rand("legendary");
 return rand("ultra");
 }
 
-// ЛЕТНИЙ
+// лето
 if(type===4){
 if(r<50) return rand("green");
 if(r<80) return rand("blue");
@@ -206,7 +239,7 @@ let pool=items.filter(i=>i.r===type);
 return pool[Math.floor(Math.random()*pool.length)];
 }
 
-// ===== КЕЙС =====
+// ===== CS ROLL =====
 function openCase(type){
 
 let cost=[0,149,519,999,699][type];
@@ -218,35 +251,66 @@ return;
 
 stars-=cost;
 
-let res=document.getElementById("result");
-res.innerText="🎁 открытие...";
+let roll=document.getElementById("roll");
+roll.innerHTML="";
 
-let anim=setInterval(()=>{
-res.innerText="🎲 "+getItem(type).name;
-},80);
+let sequence=[];
+
+// создаём ленту
+for(let i=0;i<25;i++){
+let it=getItem(type);
+sequence.push(it);
+roll.innerHTML+=`<div class="item ${it.r}">${it.name}</div>`;
+}
+
+// финальный
+let finalItem=getItem(type);
+sequence[20]=finalItem;
 
 setTimeout(()=>{
-clearInterval(anim);
 
-let item=getItem(type);
-inv.push(item);
+roll.style.transform="translateX(-2000px)";
 
-res.innerHTML="🎉 "+item.name;
+},100);
 
+setTimeout(()=>{
+
+inv.push(finalItem);
 update();
+document.getElementById("result").innerHTML="🎉 "+finalItem.name;
 
-},1500);
+roll.style.transform="translateX(0)";
+
+},3200);
 
 }
 
-// ===== ПРОДАЖА =====
+// ===== INVENTORY =====
+function update(){
+
+document.getElementById("stars").innerText=stars;
+document.getElementById("gems").innerText=gems;
+
+let box=document.getElementById("inventory");
+box.innerHTML="";
+
+inv.forEach((i,idx)=>{
+box.innerHTML+=`
+<div class="inv-item">
+<span class="${i.r}">${i.name}</span>
+<button onclick="sell(${idx})">💰 ${price[i.r]}⭐</button>
+</div>`;
+});
+
+}
+
 function sell(i){
 stars+=price[inv[i].r];
 inv.splice(i,1);
 update();
 }
 
-// ===== КРАФТ =====
+// ===== CRAFT =====
 function craft(){
 
 let u=inv.filter(i=>i.r==="ultra").length;
@@ -268,49 +332,27 @@ return false;
 return true;
 });
 
-alert("🔫 создан ВОДЯНОЙ АВТОМАТИК 🌊");
+alert("🔫 ВОДЯНОЙ АВТОМАТИК 🌊 создан");
 update();
 }
 
-// ===== ДОНАТ =====
+// ===== DONATE =====
 function donate(){
 
-let code=prompt("Введите код:");
+let code=prompt("код:");
 
 if(code!=="g778592612"){
 alert("❌ неверно");
 return;
 }
 
-let s=Number(prompt("⭐ сколько выдать?"));
-let g=Number(prompt("💎 сколько выдать?"));
-
-if(isNaN(s)||isNaN(g)) return;
+let s=Number(prompt("⭐"));
+let g=Number(prompt("💎"));
 
 stars+=s;
 gems+=g;
 
 update();
-alert("💰 начислено");
-}
-
-// ===== UI =====
-function update(){
-
-document.getElementById("stars").innerText=stars;
-document.getElementById("gems").innerText=gems;
-
-let box=document.getElementById("inventory");
-box.innerHTML="";
-
-inv.forEach((i,idx)=>{
-box.innerHTML+=`
-<div class="inv-item">
-<span class="${i.r}">${i.name}</span>
-<button onclick="sell(${idx})">💰 ${price[i.r]}⭐</button>
-</div>`;
-});
-
 }
 
 function show(id){
