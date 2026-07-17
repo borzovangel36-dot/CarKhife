@@ -2,561 +2,500 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2URB</title>
+    <title>Мой Город: Зеленый Экономический Симулятор</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c3e50;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    <link rel="stylesheet" href="style.css">
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #34495e, #2c3e50);
+        }
 
-    <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+        .hidden { display: none !important; }
 
+        /* Лобби / Главное меню */
+        .lobby-content, .win-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            max-width: 550px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 5px; color: #2ecc71; text-shadow: 0 2px 4px rgba(0,0,0,0.3); margin-top: 0; }
+        .subtitle { color: #bdc3c7; font-size: 1.1rem; margin-bottom: 25px; }
+
+        .rules-box {
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .rules-box ul { padding-left: 20px; margin: 0; }
+        .rules-box li { margin-bottom: 10px; color: #ecf0f1; }
+
+        button {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        button:hover { background: #27ae60; transform: scale(1.05); }
+        button:disabled { background: #7f8c8d; cursor: not-allowed; transform: none; }
+
+        /* Игровой интерфейс */
+        .game-container { display: flex; background: #1e272e; padding: 15px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        canvas { border-radius: 8px; background: #27ae60; }
+        .ui-panel { width: 320px; margin-left: 20px; display: flex; flex-direction: column; gap: 15px; }
+
+        .stats-box, .controls-box, .log-box {
+            background: #2d3436;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #485460;
+        }
+
+        .stats-box p { font-size: 1.2rem; margin: 8px 0; font-weight: 600; }
+        #stat-money { color: #2ecc71; }
+        #stat-slots { color: #f1c40f; }
+
+        .controls-box { display: flex; flex-direction: column; gap: 10px; }
+        .gps-alert { color: #e74c3c; font-weight: bold; animation: blink 1s infinite; text-align: center; margin: 5px 0; }
+        .gps-buttons { display: flex; gap: 10px; justify-content: center; }
+        #action-btn { background: #3498db; }
+        #action-btn:hover:not(:disabled) { background: #2980b9; }
+        #upgrade-btn { background: #9b59b6; }
+
+        .log-box { flex-grow: 1; display: flex; flex-direction: column; }
+        .log-box h3 { margin-top: 0; margin-bottom: 10px; color: #bdc3c7; }
+        #game-log { height: 180px; overflow-y: auto; font-size: 0.9rem; color: #dcdde1; display: flex; flex-direction: column; gap: 6px; }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+    </style>
 </head>
 <body>
 
-    <div id="welcomeScreen">
-
-        <div class="logo">
-            <h1>2URB</h1>
-            <p>Карта Бишкека и автобусы</p>
+    <!-- Главное Меню / Лобби -->
+    <div id="lobby" class="screen">
+        <div class="lobby-content">
+            <h1>🌳 МОЙ ГОРОД 🌳</h1>
+            <p class="subtitle">Экономический симулятор с развилками и GPS</p>
+            
+            <div class="rules-box">
+                <h3>📜 Инструкция предпринимателя:</h3>
+                <ul>
+                    <li>Выкупай бизнесы (Парикмахерская, Ларек и др.), чтобы лутать доход каждый круг.</li>
+                    <li><strong>Налоговая:</strong> Лимит на старте — 2 бизнеса. Покупай там новые слоты.</li>
+                    <li><strong>Банк:</strong> Плати налоги вовремя (раз в 4 круга), иначе точку арестуют и закроют!</li>
+                    <li><strong>GPS-Навигация:</strong> На развилках сам выбирай путь на кубике, чтобы успеть доехать.</li>
+                    <li><strong>Цель:</strong> Скупить все 6 бизнесов и накопить $3000 на выкуп Мэрии.</li>
+                </ul>
+            </div>
+            <button id="start-btn">Погнали 🚀</button>
         </div>
-
-        <div class="buttons">
-
-            <button id="openMapBtn">
-                🗺 Карта
-            </button>
-
-            <a href="https://t.me/KosmosHardoxxx" target="_blank">
-                <button>
-                    📞 Тех.Поддержка
-                </button>
-            </a>
-
-        </div>
-
     </div>
 
-    <div id="mapPage">
+    <!-- Игровой Экран -->
+    <div id="game-screen" class="screen hidden">
+        <div class="game-container">
+            <canvas id="gameCanvas" width="700" height="700"></canvas>
+            
+            <!-- Панель управления справа -->
+            <div class="ui-panel">
+                <div class="stats-box">
+                    <h2>📊 Статистика</h2>
+                    <p>💰 Баланс: <span id="stat-money">$1000</span></p>
+                    <p>🔑 Слоты: <span id="stat-slots">0 / 2</span></p>
+                    <p>🔄 Пройдено кругов: <span id="stat-turns">0</span></p>
+                </div>
 
-        <div class="topBar">
+                <div class="controls-box">
+                    <h3>🎮 Управление</h3>
+                    <button id="dice-btn">🎲 Бросить кубик</button>
+                    
+                    <div id="gps-controls" class="hidden">
+                        <p class="gps-alert">🗺 GPS: На перекрестке!</p>
+                        <div class="gps-buttons">
+                            <button id="gps-straight-btn" style="background:#f39c12">Прямо</button>
+                            <button id="gps-turn-btn" style="background:#e67e22">Повернуть</button>
+                        </div>
+                    </div>
+                    
+                    <button id="action-btn" disabled>Действие</button>
+                    <button id="upgrade-btn" class="hidden">Прокачать бизнес</button>
+                </div>
 
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Поиск места..."
-            >
-
-            <button id="searchBtn">
-                🔍 Поиск
-            </button>
-
-            <button id="locationBtn">
-                📍 Я здесь
-            </button>
-
-            <button id="busBtn">
-                🚌 Автобусы
-            </button>
-
+                <div class="log-box">
+                    <h3>📋 Журнал событий</h3>
+                    <div id="game-log"></div>
+                </div>
+            </div>
         </div>
-
-        <div id="map"></div>
-
-        <div id="popularPlaces">
-
-            <h2>⭐ Популярные места</h2>
-
-            <button class="placeBtn">12 микрорайон</button>
-            <button class="placeBtn">Парк Ынтымак</button>
-            <button class="placeBtn">Ошский рынок</button>
-            <button class="placeBtn">ТЦ ЦУМ</button>
-            <button class="placeBtn">ТРЦ VeFA</button>
-            <button class="placeBtn">Asia Mall</button>
-            <button class="placeBtn">Площадь Ала-Тоо</button>
-            <button class="placeBtn">Ала-Арча</button>
-            <button class="placeBtn">Аламединский рынок</button>
-            <button class="placeBtn">Рынок Дордой</button>
-
-        </div>
-
-        <div id="busPanel">
-
-            <h2>🚌 Автобусы</h2>
-
-            <label><input type="checkbox"> 222</label>
-            <label><input type="checkbox"> 227</label>
-            <label><input type="checkbox"> 216</label>
-            <label><input type="checkbox"> 195</label>
-            <label><input type="checkbox"> 212</label>
-            <label><input type="checkbox"> 66</label>
-            <label><input type="checkbox"> 38</label>
-            <label><input type="checkbox"> 36</label>
-
-        </div>
-
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script src="places.js"></script>
-    <script src="buses.js"></script>
-    <script src="script.js"></script>
-
-</body>
-</html>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
-}
-
-body{
-    overflow:hidden;
-}
-
-/* ГЛАВНАЯ */
-
-#welcomeScreen{
-    width:100vw;
-    height:100vh;
-
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-
-    background:linear-gradient(
-        -45deg,
-        #00c6ff,
-        #0072ff,
-        #7f00ff,
-        #ff0080
-    );
-
-    background-size:400% 400%;
-
-    animation:gradientMove 10s ease infinite;
-}
-
-@keyframes gradientMove{
-    0%{
-        background-position:0% 50%;
-    }
-    50%{
-        background-position:100% 50%;
-    }
-    100%{
-        background-position:0% 50%;
-    }
-}
-
-.logo h1{
-    font-size:90px;
-    color:white;
-    text-shadow:0 0 25px rgba(255,255,255,0.7);
-}
-
-.logo p{
-    text-align:center;
-    color:white;
-    margin-top:10px;
-    font-size:20px;
-}
-
-.buttons{
-    margin-top:40px;
-
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-}
-
-.buttons button{
-    width:250px;
-    height:60px;
-
-    border:none;
-    border-radius:15px;
-
-    font-size:20px;
-    cursor:pointer;
-
-    transition:0.3s;
-}
-
-.buttons button:hover{
-    transform:scale(1.05);
-}
-
-.buttons a{
-    text-decoration:none;
-}
-
-/* КАРТА */
-
-#mapPage{
-    display:none;
-    width:100vw;
-    height:100vh;
-}
-
-#map{
-    width:100%;
-    height:100%;
-}
-
-/* ВЕРХНЯЯ ПАНЕЛЬ */
-
-.topBar{
-    position:absolute;
-
-    top:15px;
-    left:50%;
-    transform:translateX(-50%);
-
-    z-index:1000;
-
-    display:flex;
-    gap:10px;
-
-    background:white;
-
-    padding:10px;
-
-    border-radius:15px;
-
-    box-shadow:0 5px 20px rgba(0,0,0,0.2);
-}
-
-.topBar input{
-    width:250px;
-
-    padding:10px;
-
-    border:1px solid #ccc;
-
-    border-radius:10px;
-}
-
-.topBar button{
-    border:none;
-
-    padding:10px 15px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    background:#007bff;
-    color:white;
-}
-
-/* ПОПУЛЯРНЫЕ МЕСТА */
-
-#popularPlaces{
-    position:absolute;
-
-    bottom:15px;
-    left:15px;
-
-    width:270px;
-
-    max-height:350px;
-
-    overflow-y:auto;
-
-    background:white;
-
-    padding:15px;
-
-    border-radius:15px;
-
-    z-index:1000;
-
-    box-shadow:0 5px 20px rgba(0,0,0,0.2);
-}
-
-#popularPlaces h2{
-    margin-bottom:10px;
-}
-
-.placeBtn{
-    width:100%;
-
-    margin-top:6px;
-
-    border:none;
-
-    background:#f3f3f3;
-
-    padding:10px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-}
-
-.placeBtn:hover{
-    background:#e5e5e5;
-}
-
-/* ПАНЕЛЬ АВТОБУСОВ */
-
-#busPanel{
-    position:absolute;
-
-    right:15px;
-    top:90px;
-
-    width:240px;
-
-    background:white;
-
-    padding:15px;
-
-    border-radius:15px;
-
-    z-index:1000;
-
-    box-shadow:0 5px 20px rgba(0,0,0,0.2);
-
-    display:none;
-}
-
-#busPanel h2{
-    margin-bottom:10px;
-}
-
-#busPanel label{
-    display:block;
-
-    margin-top:8px;
-
-    cursor:pointer;
-}
-
-/* МОБИЛКИ */
-
-@media(max-width:768px){
-
-    .logo h1{
-        font-size:60px;
-    }
-
-    .topBar{
-        width:95%;
-        flex-wrap:wrap;
-    }
-
-    .topBar input{
-        width:100%;
-    }
-
-    #popularPlaces{
-        width:220px;
-    }
-
-}
-const places = [
-    {
-        name: "12 микрорайон",
-        lat: 42.8467,
-        lng: 74.6001
-    },
-    {
-        name: "Парк Ынтымак",
-        lat: 42.8725,
-        lng: 74.6122
-    },
-    {
-        name: "Ошский рынок",
-        lat: 42.8760,
-        lng: 74.6070
-    },
-    {
-        name: "ТЦ ЦУМ",
-        lat: 42.8746,
-        lng: 74.6121
-    },
-    {
-        name: "ТРЦ VeFA",
-        lat: 42.8425,
-        lng: 74.5850
-    },
-    {
-        name: "Asia Mall",
-        lat: 42.8459,
-        lng: 74.6055
-    },
-    {
-        name: "Площадь Ала-Тоо",
-        lat: 42.8746,
-        lng: 74.6121
-    },
-    {
-        name: "Ала-Арча",
-        lat: 42.6100,
-        lng: 74.4800
-    },
-    {
-        name: "Аламединский рынок",
-        lat: 42.8620,
-        lng: 74.6200
-    },
-    {
-        name: "Рынок Дордой",
-        lat: 42.9000,
-        lng: 74.6400
-    }
-];
-let map;
-let userMarker;
-let markers = [];
-let busLayers = {};
-
-const mapPage = document.getElementById("mapPage");
-const welcomeScreen = document.getElementById("welcomeScreen");
-
-const openMapBtn = document.getElementById("openMapBtn");
-const searchBtn = document.getElementById("searchBtn");
-const searchInput = document.getElementById("searchInput");
-const locationBtn = document.getElementById("locationBtn");
-const busBtn = document.getElementById("busBtn");
-const busPanel = document.getElementById("busPanel");
-
-// --- ОТКРЫТИЕ КАРТЫ ---
-openMapBtn.onclick = () => {
-    welcomeScreen.style.display = "none";
-    mapPage.style.display = "block";
-
-    initMap();
-};
-
-// --- ИНИЦИАЛИЗАЦИЯ КАРТЫ ---
-function initMap() {
-    map = L.map('map').setView([42.8746, 74.6121], 12);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    loadPlaces();
-}
-
-// --- ЗАГРУЗКА МЕСТ ---
-function loadPlaces() {
-    places.forEach(p => {
-        const marker = L.marker([p.lat, p.lng]).addTo(map)
-            .bindPopup(`<b>${p.name}</b>`);
-
-        markers.push(marker);
-    });
-}
-
-// --- ПОИСК ---
-searchBtn.onclick = () => {
-    const query = searchInput.value.toLowerCase();
-
-    const place = places.find(p =>
-        p.name.toLowerCase().includes(query)
-    );
-
-    if (place) {
-        map.setView([place.lat, place.lng], 15);
-
-        L.popup()
-            .setLatLng([place.lat, place.lng])
-            .setContent(place.name)
-            .openOn(map);
-    } else {
-        alert("Место не найдено");
-    }
-};
-
-// --- ГЕОЛОКАЦИЯ ---
-locationBtn.onclick = () => {
-    if (!navigator.geolocation) {
-        alert("Геолокация не поддерживается");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
-        map.setView([lat, lng], 15);
-
-        if (userMarker) {
-            map.removeLayer(userMarker);
-        }
-
-        userMarker = L.marker([lat, lng])
-            .addTo(map)
-            .bindPopup("Вы здесь")
-            .openPopup();
-    });
-};
-
-// --- ПАНЕЛЬ АВТОБУСОВ ---
-busBtn.onclick = () => {
-    busPanel.style.display =
-        busPanel.style.display === "block" ? "none" : "block";
-};
-
-// --- АВТОБУСА МАРШРУТЫ ---
-const checkboxes = document.querySelectorAll("#busPanel input");
-
-checkboxes.forEach(cb => {
-    cb.addEventListener("change", () => {
-        updateBuses();
-    });
-});
-
-// --- ОБНОВЛЕНИЕ АВТОБУСОВ ---
-function updateBuses() {
-
-    // очистка старых линий
-    Object.values(busLayers).forEach(layer => {
-        map.removeLayer(layer);
-    });
-
-    busLayers = {};
-
-    const selected = [];
-
-    document.querySelectorAll("#busPanel input:checked")
-        .forEach(cb => selected.push(cb.parentElement.innerText.trim()));
-
-    selected.forEach(busNum => {
-        const bus = buses.find(b => b.number === busNum);
-
-        if (!bus) return;
-
-        // просто "примерная линия" (по точкам мест)
-        const line = [];
-
-        bus.route.forEach(stop => {
-            const p = places.find(pl =>
-                pl.name.toLowerCase().includes(stop.toLowerCase())
-            );
-
-            if (p) {
-                line.push([p.lat, p.lng]);
+    <!-- Экран Победы -->
+    <div id="win-screen" class="screen hidden">
+        <div class="win-content">
+            <h1>🎉 ПОБЕДА! 🎉</h1>
+            <p style="font-size:1.2rem; margin-bottom:25px;">Вы полностью выкупили город, подмяли под себя бизнесы и возглавили Мэрию!</p>
+            <button onclick="location.reload()">Сначала 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Состояние игрока и бизнеса
+        let player = { money: 1000, slots: 2, pos: 0, turns: 0 };
+        let businesses = {};
+        let gameLogs = [];
+        let currentDice = 0;
+        let isMoving = false;
+        let pendingGPS = false;
+
+        // Архитектура карты-восьмерки (координаты клеток)
+        const MAP = [
+            { name: "СТАРТ", type: "start", x: 60, y: 60, nextDefault: 1 },
+            { name: "Парикмахерская", type: "biz", x: 220, y: 60, price: 150, income: 25, upPrice: 100, upInc: 55, nextDefault: 2, id: 1 },
+            { name: "Ларек с шаурмой", type: "biz", x: 380, y: 60, price: 220, income: 40, upPrice: 150, upInc: 85, nextDefault: 3, id: 2 },
+            // Развилка GPS 1
+            { name: "Развилка GPS", type: "gps", x: 600, y: 60, nextDefault: 4, nextTurn: 7, text: "Прямо: к Кафе. Повернуть: Срез к Банку через Озеро." }, 
+            { name: "Уютная Кафешка", type: "biz", x: 600, y: 240, price: 800, income: 160, upPrice: 500, upInc: 330, nextDefault: 5, id: 3 },
+            { name: "Компьютерный клуб", type: "biz", x: 600, y: 440, price: 400, income: 75, upPrice: 250, upInc: 160, nextDefault: 6, id: 4 },
+            // Развилка GPS 2
+            { name: "Перекресток", type: "gps", x: 600, y: 620, nextDefault: 11, nextTurn: 9, text: "Прямо: в Мэрию. Повернуть: К Автомойке." },
+            
+            // Внутренний сектор у озера
+            { name: "БАНК", type: "bank", x: 380, y: 260, nextDefault: 8 },
+            { name: "Налоговая", type: "tax", x: 220, y: 260, nextDefault: 10 },
+            
+            // Нижнее шоссе
+            { name: "Автомойка 24/7", type: "biz", x: 380, y: 440, price: 600, income: 110, upPrice: 400, upInc: 240, nextDefault: 7, id: 5 },
+            { name: "Служба Такси", type: "biz", x: 60, y: 440, price: 1100, income: 230, upPrice: 700, upInc: 480, nextDefault: 0, id: 6 },
+            { name: "МЭРИЯ (ФИНАЛ)", type: "mayor", x: 60, y: 620, price: 3000, nextDefault: 10 }
+        ];
+
+        // Инициализация баз данных бизнесов
+        MAP.forEach((tile, index) => {
+            if(tile.type === 'biz') {
+                businesses[index] = { level: 1, owner: null, deadline: 4, price: tile.price, currentIncome: tile.income };
             }
         });
 
-        if (line.length > 1) {
-            busLayers[busNum] = L.polyline(line, {
-                color: getRandomColor(),
-                weight: 4
-            }).addTo(map);
-        }
-    });
-}
+        // Запуск клика по лобби
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('lobby').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            addLog("🌳 Город ждет! У вас есть $1000. Ваша фишка — красная.");
+            updateUI();
+            drawMap();
+        });
 
-// --- ЦВЕТ МАРШРУТА ---
-function getRandomColor() {
-    const colors = ["red", "blue", "green", "orange", "purple"];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+        function addLog(text) {
+            const logBox = document.getElementById('game-log');
+            gameLogs.push(text);
+            logBox.innerHTML = gameLogs.slice(-8).map(log => `<div>${log}</div>`).join('');
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateUI() {
+            document.getElementById('stat-money').innerText = `$${player.money}`;
+            let ownedCount = Object.values(businesses).filter(b => b.owner === 'player').length;
+            document.getElementById('stat-slots').innerText = `${ownedCount} / ${player.slots}`;
+            document.getElementById('stat-turns').innerText = player.turns;
+
+            document.getElementById('action-btn').disabled = true;
+            document.getElementById('upgrade-btn').classList.add('hidden');
+            
+            let currentTile = MAP[player.pos];
+            let bState = businesses[player.pos];
+
+            if (!pendingGPS && !isMoving) {
+                if (currentTile.type === 'biz') {
+                    document.getElementById('action-btn').disabled = false;
+                    if (!bState.owner) {
+                        document.getElementById('action-btn').innerText = `Купить бизнес ($${currentTile.price})`;
+                    } else if (bState.owner === 'player') {
+                        document.getElementById('action-btn').innerText = `Оплатить налог ($${Math.floor(bState.price*0.1)})`;
+                        if(bState.level === 1) {
+                            document.getElementById('upgrade-btn').classList.remove('hidden');
+                            document.getElementById('upgrade-btn').innerText = `Прокачать до Ур.2 ($${currentTile.upPrice})`;
+                        }
+                    }
+                } else if (currentTile.type === 'tax') {
+                    document.getElementById('action-btn').disabled = false;
+                    document.getElementById('action-btn').innerText = "Купить новый слот ($300)";
+                } else if (currentTile.type === 'bank') {
+                    document.getElementById('action-btn').disabled = false;
+                    document.getElementById('action-btn').innerText = "Продлить ВСЕ налоги";
+                } else if (currentTile.type === 'mayor') {
+                    document.getElementById('action-btn').disabled = false;
+                    document.getElementById('action-btn').innerText = "Выкупить Мэрию ($3000)";
+                }
+            }
+        }
+
+        // Рендеринг графики
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Трава
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Озеро в центре
+            ctx.beginPath(); ctx.arc(350, 350, 100, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f1c40f'; ctx.fill(); // Песок
+            ctx.beginPath(); ctx.arc(350, 350, 90, 0, 2 * Math.PI);
+            ctx.fillStyle = '#3498db'; ctx.fill(); // Вода
+
+            // Декоративные волны на воде
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillRect(320, 330, 40, 4); ctx.fillRect(340, 360, 50, 4);
+
+            // Дорожная сеть
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 16;
+            MAP.forEach(tile => {
+                let nextTile = MAP[tile.nextDefault];
+                ctx.beginPath(); ctx.moveTo(tile.x, tile.y); ctx.lineTo(nextTile.x, nextTile.y); ctx.stroke();
+
+                if (tile.type === 'gps') {
+                    let turnTile = MAP[tile.nextTurn];
+                    ctx.beginPath(); ctx.moveTo(tile.x, tile.y); ctx.lineTo(turnTile.x, turnTile.y); ctx.stroke();
+                }
+            });
+
+            // Клетки-здания
+            MAP.forEach((tile, index) => {
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#2c3e50';
+                
+                if (tile.type === 'start') ctx.fillStyle = '#27ae60';
+                else if (tile.type === 'bank') ctx.fillStyle = '#e67e22';
+                else if (tile.type === 'tax') ctx.fillStyle = '#9b59b6';
+                else if (tile.type === 'gps') ctx.fillStyle = '#f1c40f';
+                else if (tile.type === 'mayor') ctx.fillStyle = '#c0392b';
+                else {
+                    let b = businesses[index];
+                    ctx.fillStyle = (b.owner === 'player') ? '#2980b9' : '#ecf0f1';
+                }
+
+                ctx.fillRect(tile.x - 35, tile.y - 22, 70, 44);
+                ctx.strokeRect(tile.x - 35, tile.y - 22, 70, 44);
+
+                // Текст
+                ctx.fillStyle = (ctx.fillStyle === '#ecf0f1' || tile.type === 'gps') ? '#000' : '#fff';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.textAlign = 'center';
+                
+                let words = tile.name.split(' ');
+                if (words.length > 1) {
+                    ctx.fillText(words[0], tile.x, tile.y - 3);
+                    ctx.fillText(words.slice(1).join(' '), tile.x, tile.y + 7);
+                } else {
+                    ctx.fillText(tile.name, tile.x, tile.y + 3);
+                }
+
+                // Ценники и дедлайны
+                if (tile.type === 'biz') {
+                    let b = businesses[index];
+                    ctx.font = '8px sans-serif';
+                    if(b.owner === 'player') {
+                        ctx.fillStyle = b.deadline <= 1 ? '#e74c3c' : '#fff';
+                        ctx.fillText(`Ур.${b.level} (Ходов:${b.deadline})`, tile.x, tile.y + 18);
+                    } else {
+                        ctx.fillStyle = '#7f8c8d';
+                        ctx.fillText(`$${tile.price}`, tile.x, tile.y + 18);
+                    }
+                }
+            });
+
+            // Игрок
+            let pTile = MAP[player.pos];
+            ctx.beginPath(); ctx.arc(pTile.x, pTile.y, 13, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e74c3c'; ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        }
+
+        // Бросание костей
+        document.getElementById('dice-btn').addEventListener('click', () => {
+            if (isMoving || pendingGPS) return;
+            currentDice = Math.floor(Math.random() * 3) + 1; // Ходы от 1 до 3
+            addLog(`🎲 На кубике выпало: ${currentDice}`);
+            movePlayerSteps(currentDice);
+        });
+
+        function movePlayerSteps(steps) {
+            if (steps <= 0) {
+                isMoving = false;
+                checkLandingTile();
+                return;
+            }
+            isMoving = true;
+            let currentTile = MAP[player.pos];
+
+            // Если попали на GPS развилку во время движения
+            if (currentTile.type === 'gps' && steps > 0) {
+                pendingGPS = true;
+                document.getElementById('gps-controls').classList.remove('hidden');
+                document.getElementById('dice-btn').disabled = true;
+                addLog(`🗺 GPS-Навигатор: ${currentTile.text}`);
+                return; 
+            }
+
+            let oldPos = player.pos;
+            player.pos = currentTile.nextDefault;
+            
+            if (player.pos === 0 && oldPos !== 0) passStartCircle();
+
+            drawMap();
+            setTimeout(() => movePlayerSteps(steps - 1), 400);
+        }
+
+        // Выбор GPS путей
+        document.getElementById('gps-straight-btn').addEventListener('click', () => handleGPS(false));
+        document.getElementById('gps-turn-btn').addEventListener('click', () => handleGPS(true));
+
+        function handleGPS(isTurn) {
+            pendingGPS = false;
+            document.getElementById('gps-controls').classList.add('hidden');
+            document.getElementById('dice-btn').disabled = false;
+
+            let currentTile = MAP[player.pos];
+            player.pos = isTurn ? currentTile.nextTurn : currentTile.nextDefault;
+            
+            if (player.pos === 0) passStartCircle();
+
+            drawMap();
+            setTimeout(() => movePlayerSteps(currentDice - 1), 400);
+        }
+
+        function passStartCircle() {
+            player.turns++;
+            player.money += 250;
+            addLog("💸 Пройден круг через СТАРТ! Зарплата: +$250");
+
+            Object.keys(businesses).forEach(idx => {
+                let b = businesses[idx];
+                if (b.owner === 'player') {
+                    if (b.deadline > 0) {
+                        player.money += b.currentIncome;
+                        addLog(`📈 Прибыль от "${MAP[idx].name}": +$${b.currentIncome}`);
+                        b.deadline--;
+                    } else {
+                        addLog(`⚠️ Налоги просрочены! Власти конфисковали "${MAP[idx].name}"!`);
+                        b.owner = null; b.level = 1; b.deadline = 4; b.currentIncome = MAP[idx].income;
+                    }
+                }
+            });
+            updateUI();
+        }
+
+        function checkLandingTile() {
+            let tile = MAP[player.pos];
+            if (tile.type === 'tax') addLog("🏦 Остановка «Налоговая». Купи здесь слот, чтобы расширить бизнес.");
+            if (tile.type === 'bank') addLog("🏦 Остановка «Банк». Продли налоги для всех точек сразу.");
+            if (tile.type === 'mayor') addLog("👑 Мэрия города. Время выкупить власть, если готов!");
+            updateUI();
+        }
+
+        // Логика главных кнопок действий
+        document.getElementById('action-btn').addEventListener('click', () => {
+            let tile = MAP[player.pos];
+            let b = businesses[player.pos];
+
+            if (tile.type === 'biz') {
+                if (!b.owner) {
+                    let ownedCount = Object.values(businesses).filter(b => b.owner === 'player').length;
+                    if (ownedCount >= player.slots) {
+                        addLog("❌ Нет слотов! Съезди в Налоговую и купи лицензию."); return;
+                    }
+                    if (player.money >= tile.price) {
+                        player.money -= tile.price; b.owner = 'player'; b.deadline = 4;
+                        addLog(`🎉 Ты купил бизнес "${tile.name}"!`);
+                    } else { addLog("❌ Маловато кэша!"); }
+                } else if (b.owner === 'player') {
+                    let fee = Math.floor(b.price * 0.1);
+                    if (player.money >= fee) {
+                        player.money -= fee; b.deadline = 4;
+                        addLog(`💳 Налог за "${tile.name}" оплачен! Лимит сброшен.`);
+                    } else { addLog("❌ Недостаточно денег!"); }
+                }
+            } 
+            else if (tile.type === 'tax') {
+                if (player.money >= 300) {
+                    player.money -= 300; player.slots++;
+                    addLog(`🔑 Лицензия на руках! Максимум бизнесов теперь: ${player.slots}`);
+                } else { addLog("❌ Слот стоит $300!"); }
+            } 
+            else if (tile.type === 'bank') {
+                let totalFee = 0;
+                Object.keys(businesses).forEach(idx => { if(businesses[idx].owner === 'player') totalFee += Math.floor(businesses[idx].price * 0.1); });
+                if (totalFee === 0) { addLog("ℹ️ У тебя нет долгов по бизнесу."); return; }
+                
+                if (player.money >= totalFee) {
+                    player.money -= totalFee;
+                    Object.keys(businesses).forEach(idx => { if(businesses[idx].owner === 'player') businesses[idx].deadline = 4; });
+                    addLog(`🏦 В Банке оплачены ВСЕ счета! Списано: $${totalFee}`);
+                } else { addLog("❌ Не хватает денег закрыть налоги всех заведений!"); }
+            } 
+            else if (tile.type === 'mayor') {
+                let allOwned = Object.values(businesses).every(b => b.owner === 'player');
+                if (!allOwned) {
+                    addLog("❌ Мэр сказал: «Сначала выкупи ВСЕ 6 бизнесов в городе, потом приходи!»"); return;
+                }
+                if (player.money >= 3000) {
+                    player.money -= 3000;
+                    document.getElementById('game-screen').classList.add('hidden');
+                    document.getElementById('win-screen').classList.remove('hidden');
+                } else { addLog("❌ Выкуп Мэрии стоит $3000!"); }
+            }
+
+            drawMap();
+            updateUI();
+        });
+
+        // Улучшение
+        document.getElementById('upgrade-btn').addEventListener('click', () => {
+            let tile = MAP[player.pos];
+            let b = businesses[player.pos];
+
+            if(b && b.owner === 'player' && b.level === 1) {
+                if (player.money >= tile.upPrice) {
+                    player.money -= tile.upPrice;
+                    b.level = 2; b.currentIncome = tile.upInc;
+                    addLog(`🚀 Прокачка! "${tile.name}" теперь приносит $${tile.upInc} за круг!`);
+                    drawMap(); updateUI();
+                } else { addLog("❌ Не хватает на апгрейд!"); }
+            }
+        });
+    </script>
+</body>
+</html>
