@@ -1,429 +1,900 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brawl Stars Boost | Cyberpunk Lobby</title>
-    <style>
-        :root {
-            --cyber-black: #060814;
-            --cyber-dark: #0f1123;
-            --cyber-pink: #ff0055;
-            --cyber-blue: #00f0ff;
-            --cyber-purple: #9d00ff;
-            --text-main: #e0e6ed;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Telegram Case Mini App</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent-blue: #3b82f6;
+      --accent-gold: #eab308;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* РЕДКОСТИ */
+      --rare-color: #3b82f6;
+      --super-rare-color: #06b6d4;
+      --epic-color: #a855f7;
+      --mythic-color: #eab308;
+      --legendary-color: #ef4444;
+      --ultra-color: #ec4899;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial Black', 'Impact', sans-serif;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
 
-        body {
-            background-color: var(--cyber-black);
-            color: var(--text-main);
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(157, 0, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.12) 0%, transparent 40%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        /* Переливающийся киберпанк заголовок в стиле лобби Brawl Stars */
-        .lobby-container {
-            width: 100%;
-            max-width: 800px;
-            background: rgba(15, 17, 35, 0.75);
-            border: 3px solid var(--cyber-blue);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
+    /* ХЕДЕР С БАЛАНСОМ */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 10;
+    }
 
-        .lobby-title {
-            font-size: 2.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: linear-gradient(90deg, var(--cyber-pink), var(--cyber-purple), var(--cyber-blue), var(--cyber-pink));
-            background-size: 300% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textShimmer 6s linear infinite;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
-        }
+    .user-info {
+      font-weight: 600;
+      font-size: 14px;
+    }
 
-        @keyframes textShimmer {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 300% 50%; }
-        }
+    .balance-badge {
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      color: #000;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 10px rgba(234, 179, 8, 0.3);
+    }
 
-        /* Кнопки главного лобби */
-        .lobby-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 450px;
-            margin: 0 auto;
-        }
+    /* ОСНОВНОЙ КОНТЕНТ */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 80px;
+      position: relative;
+    }
 
-        .btn-cyber {
-            background: transparent;
-            border: 2px solid var(--cyber-purple);
-            color: #fff;
-            padding: 16px 30px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            border-radius: 10px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(157, 0, 255, 0.2);
-        }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
 
-        .btn-cyber::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4), transparent);
-            transition: all 0.4s;
-        }
+    .tab-content.active {
+      display: block;
+    }
 
-        .btn-cyber:hover::before {
-            left: 100%;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .btn-cyber:hover {
-            border-color: var(--cyber-blue);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
-            transform: scale(1.03);
-        }
+    /* ВКЛАДКА КЕЙСЫ (Фон Pepe) */
+    #cases-tab {
+      background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
+                  url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=600&auto=format&fit=crop') center/cover;
+      min-height: 100%;
+      border-radius: 16px;
+      padding: 12px;
+    }
 
-        /* Кнопка Буст — Главная и самая яркая */
-        .btn-boost {
-            border-color: var(--cyber-pink);
-            font-size: 1.5rem;
-            letter-spacing: 1px;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-            background: linear-gradient(135deg, rgba(255, 0, 85, 0.2), rgba(157, 0, 255, 0.2));
-        }
-        .btn-boost:hover {
-            border-color: var(--cyber-pink);
-            box-shadow: 0 0 30px rgba(255, 0, 85, 0.8);
-        }
+    .cases-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
 
-        /* Скрытые по дефолту секции (Окна) */
-        .window-section {
-            display: none;
-            margin-top: 30px;
-            border-top: 2px dashed rgba(0, 240, 255, 0.3);
-            padding-top: 30px;
-            animation: fadeIn 0.4s ease forwards;
-        }
+    .case-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .case-card img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
 
-        .window-section h3 {
-            color: var(--cyber-blue);
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
+    .case-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
 
-        /* Список карточек Буста */
-        .boost-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
+    .case-price {
+      font-size: 12px;
+      color: var(--accent-gold);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
 
-        @media(min-width: 600px) {
-            .boost-grid { grid-template-columns: 1fr 1fr; }
-        }
+    .btn {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
 
-        .boost-card {
-            background: rgba(6, 8, 20, 0.9);
-            border: 2px solid rgba(157, 0, 255, 0.4);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            transition: border-color 0.3s;
-        }
+    .btn:active {
+      opacity: 0.8;
+    }
 
-        .boost-card:hover {
-            border-color: var(--cyber-blue);
-        }
+    /* РУЛЕТКА OПЕНИНГА */
+    .roulette-container {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 100;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-        .boost-title {
-            font-size: 1.1rem;
-            color: #fff;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
+    .roulette-wrapper {
+      width: 100%;
+      height: 120px;
+      background: #090d16;
+      border: 2px solid var(--accent-gold);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      margin: 20px 0;
+    }
 
-        .boost-price {
-            font-size: 0.9rem;
-            color: #a0aab5;
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
+    .roulette-pointer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #ef4444;
+      z-index: 10;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px #ef4444;
+    }
 
-        .boost-price span {
-            color: var(--cyber-blue);
-            font-weight: bold;
-        }
+    .roulette-track {
+      display: flex;
+      position: absolute;
+      left: 0;
+      top: 10px;
+      height: 100px;
+      will-change: transform;
+    }
 
-        .btn-ticket {
-            background: var(--cyber-purple);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background 0.2s;
-        }
-        .btn-ticket:hover {
-            background: var(--cyber-pink);
-        }
+    .roulette-item {
+      width: 100px;
+      height: 100px;
+      margin-right: 8px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 4px solid var(--rare-color);
+      padding: 4px;
+    }
 
-        /* Стилизация Выданного Талона */
-        .ticket-box {
-            background: linear-gradient(135deg, #120e2e 0%, #060814 100%);
-            border: 3px dashed var(--cyber-pink);
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 500px;
-            margin: 20px auto 0 auto;
-            position: relative;
-            box-shadow: 0 0 25px rgba(255, 0, 85, 0.3);
-        }
+    .roulette-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
 
-        .ticket-box::before, .ticket-box::after {
-            content: '';
-            position: absolute;
-            width: 20px; height: 20px;
-            background: var(--cyber-dark);
-            border-radius: 50%;
-            top: 50%; transform: translateY(-50%);
-        }
-        .ticket-box::before { left: -12px; }
-        .ticket-box::after { right: -12px; }
+    .roulette-item .name {
+      font-size: 10px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      margin-top: 4px;
+    }
 
-        .ticket-header {
-            color: var(--cyber-pink);
-            font-size: 1.4rem;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
+    /* ВИН-МОДАЛКА */
+    .win-modal {
+      display: none;
+      text-align: center;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--accent-gold);
+      box-shadow: 0 0 25px rgba(234, 179, 8, 0.2);
+      width: 90%;
+      max-width: 320px;
+    }
 
-        .ticket-info {
-            text-align: left;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+    .win-modal img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 12px 0;
+    }
 
-        .ticket-warning {
-            color: #ffcc00;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            animation: pulse 1.5s infinite;
-        }
+    /* ВКЛАДКА КРАФТ */
+    .craft-slots {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+    }
 
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; text-shadow: 0 0 10px rgba(255,204,0,0.5); }
-            100% { opacity: 0.7; }
-        }
+    .craft-slot {
+      width: 80px;
+      height: 80px;
+      border: 2px dashed rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(30, 41, 59, 0.5);
+      cursor: pointer;
+      position: relative;
+    }
 
-        /* Текстовые блоки для Важно и Инструкции */
-        .info-text-block {
-            background: rgba(6, 8, 20, 0.8);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: left;
-            font-size: 1rem;
-            line-height: 1.5;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .info-text-block p {
-            margin-bottom: 12px;
-        }
-        .info-text-block p:last-child {
-            margin-bottom: 0;
-        }
-    </style>
+    .craft-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .recipes-list {
+      margin-top: 20px;
+    }
+
+    .recipe-card {
+      background: var(--card-bg);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      border-left: 3px solid var(--ultra-color);
+    }
+
+    /* ИНВЕНТАРЬ И МАРКЕТ Grid */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      position: relative;
+      border-bottom: 3px solid #ccc;
+    }
+
+    .item-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 4px;
+    }
+
+    .item-card .title {
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-card .rarity-tag {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* РЕДКОСТИ (BORDER & GLOW) */
+    .rare { border-color: var(--rare-color) !important; }
+    .super-rare { border-color: var(--super-rare-color) !important; }
+    .epic { border-color: var(--epic-color) !important; }
+    .mythic { border-color: var(--mythic-color) !important; }
+    .legendary { border-color: var(--legendary-color) !important; }
+    .ultra { 
+      border-color: var(--ultra-color) !important; 
+      box-shadow: 0 0 10px var(--ultra-color);
+    }
+
+    /* ВКЛАДКА ТЕХПОДДЕРЖКА (Фон Наушники) */
+    #support-tab {
+      background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
+                  url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop') center/cover;
+      min-height: 100%;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    /* МАРКЕТ ПЕРЕКЛЮЧАТЕЛЬ */
+    .market-switch {
+      display: flex;
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 12px;
+    }
+
+    .market-switch button {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .market-switch button.active {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+
+    /* НИЖНЯЯ НАВИГАЦИЯ */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: #090d16;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      z-index: 10;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--accent-blue);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 2px;
+      fill: currentColor;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="lobby-container">
-        <h1 class="lobby-title">Brawl Stars Lobby</h1>
-        
-        <!-- Главное меню лобби -->
-        <div class="lobby-menu">
-            <button class="btn-cyber btn-boost" onclick="openSection('boostSection')">🔥 Буст</button>
-            <button class="btn-cyber" onclick="openSection('importantSection')">⚠️ Важно</button>
-            <button class="btn-cyber" onclick="openSection('whereToWriteSection')">💬 Я получил талон, куда писать?</button>
-        </div>
-
-        <!-- СЕКЦИЯ: БУСТ -->
-        <div id="boostSection" class="window-section">
-            <h3>Выбери направление буста</h3>
-            <div class="boost-grid">
-                
-                <!-- Карточка 1 -->
-                <div class="boost-card">
-                    <div class="boost-title">Мифик ➔ Легенда</div>
-                    <div class="boost-price">
-                        💵 <span>150 ₽</span> // ₸ <span>900 ₸</span> // ⭐ <span>180 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Мифик ➔ Легенда', '150 рублей // 900 тенге // 180 звезд')">Получить талон на покупку</button>
-                </div>
-
-                <!-- Карточка 2 -->
-                <div class="boost-card">
-                    <div class="boost-title">Мифик ➔ Мастер</div>
-                    <div class="boost-price">
-                        💵 <span>250 ₽</span> // ₸ <span>1500 ₸</span> // ⭐ <span>275 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Мифик ➔ Мастер', '250 рублей // 1500 тенге // 275 звезд')">Получить талон на покупку</button>
-                </div>
-
-                <!-- Карточка 3 -->
-                <div class="boost-card">
-                    <div class="boost-title">Мифик ➔ Про</div>
-                    <div class="boost-price">
-                        💵 <span>600 ₽</span> // ₸ <span>3600 ₸</span> // ⭐ <span>650 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Мифик ➔ Про', '600 рублей // 3600 тенге // 650 звезд')">Получить талон на покупку</button>
-                </div>
-
-                <!-- Карточка 4 -->
-                <div class="boost-card">
-                    <div class="boost-title">Легенда ➔ Мастер</div>
-                    <div class="boost-price">
-                        💵 <span>350 ₽</span> // ₸ <span>2100 ₸</span> // ⭐ <span>380 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Легенда ➔ Мастер', '350 рублей // 2100 тенге // 380 звезд')">Получить талон на покупку</button>
-                </div>
-
-                <!-- Карточка 5 -->
-                <div class="boost-card">
-                    <div class="boost-title">Легенда ➔ Про</div>
-                    <div class="boost-price">
-                        💵 <span>500 ₽</span> // ₸ <span>3000 ₸</span> // ⭐ <span>550 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Легенда ➔ Про', '500 рублей // 3000 тенге // 550 звезд')">Получить талон на покупку</button>
-                </div>
-
-                <!-- Карточка 6 -->
-                <div class="boost-card">
-                    <div class="boost-title">Мастер ➔ Про</div>
-                    <div class="boost-price">
-                        💵 <span>400 ₽</span> // ₸ <span>2400 ₸</span> // ⭐ <span>420 звезд</span>
-                    </div>
-                    <button class="btn-ticket" onclick="generateTicket('Мастер ➔ Про', '400 рублей // 2400 тенге // 420 звезд')">Получить талон на покупку</button>
-                </div>
-
-            </div>
-
-            <!-- Блок генерации талона -->
-            <div id="ticketOutput" style="display: none;">
-                <div class="ticket-box">
-                    <div class="ticket-header">🎫 ТАЛОН НА БУСТ</div>
-                    <div class="ticket-info" id="ticketInfo">
-                        <!-- Сюда вставится инфа -->
-                    </div>
-                    <div class="ticket-warning">📸 Сделайте скрин этого талона!</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- СЕКЦИЯ: ВАЖНО -->
-        <div id="importantSection" class="window-section">
-            <h3>⚠️ Важная информация</h3>
-            <div class="info-text-block">
-                <p>🔴 <strong>Ограничение по оплате:</strong> К сожалению, на текущий момент я <u>не могу принять прямую оплату</u> с карт Казахстана (КЗХ) или России.</p>
-                <p>⭐ Оплата принимается <strong>исключительно в Звездах Telegram (Stars)</strong>.</p>
-                <p>🤝 <strong>Система оплаты 50/50:</strong> Вы не рискуете своими средствами целиком! Сначала вы оплачиваете ровно <u>половину стоимости</u> буста, после чего мы приступаем к работе. Как только буст успешно завершен, вы переводите оставшуюся часть денег.</p>
-            </div>
-        </div>
-
-        <!-- СЕКЦИЯ: КУДА ПИСАТЬ -->
-        <div id="whereToWriteSection" class="window-section">
-            <h3>💬 Инструкция: куда отправлять талон?</h3>
-            <div class="info-text-block" style="text-align: center;">
-                <p>Вы получили талон и сделали его скриншот? Отлично! 🎉</p>
-                <p style="margin-top: 15px;">Теперь отправляйте ваш скриншот менеджеру в личные сообщения:</p>
-                <p style="font-size: 1.3rem; color: var(--cyber-blue); margin: 15px 0;">👉 <strong>@KosmosHardoxxx</strong> 👈</p>
-                <p style="font-size: 0.9rem; color: #a0aab5;">Менеджер проверит ваш талон, согласует время начала буста и поможет провести оплату первой половины в звездах.</p>
-            </div>
-        </div>
-
+  <!-- ХЕДЕР -->
+  <header>
+    <div class="user-info">TG Player</div>
+    <div class="balance-badge">
+      <span>⭐️</span>
+      <span id="balance-val">350</span>
     </div>
+  </header>
 
-    <script>
-        // Функция переключения окон лобби
-        function openSection(sectionId) {
-            // Скрываем все окна
-            document.querySelectorAll('.window-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            // Показываем выбранное
-            document.getElementById(sectionId).style.display = 'block';
-            
-            // Если переключаемся с буста, прячем прошлый сгенерированный талон
-            if (sectionId !== 'boostSection') {
-                document.getElementById('ticketOutput').style.display = 'none';
-            }
-        }
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <main>
+    
+    <!-- 1. КЕЙСЫ -->
+    <section id="cases-tab" class="tab-content active">
+      <h2 style="margin-bottom: 12px; text-shadow: 0 2px 4px #000;">Магазин Кейсов</h2>
+      <div class="cases-grid">
+        <div class="case-card">
+          <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300&auto=format&fit=crop" alt="Новичок">
+          <div class="case-title">Новичок</div>
+          <div class="case-price">50 ⭐️</div>
+          <button class="btn" onclick="openCase('beginner')">Открыть</button>
+        </div>
+        <div class="case-card">
+          <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300&auto=format&fit=crop" alt="Стандартный">
+          <div class="case-title">Стандартный</div>
+          <div class="case-price">100 ⭐️</div>
+          <button class="btn" onclick="openCase('standard')">Открыть</button>
+        </div>
+        <div class="case-card">
+          <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=300&auto=format&fit=crop" alt="Дубайский">
+          <div class="case-title">Дубайский</div>
+          <div class="case-price">250 ⭐️</div>
+          <button class="btn" onclick="openCase('dubai')">Открыть</button>
+        </div>
+        <div class="case-card" style="border: 1px solid var(--mythic-color);">
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop" alt="КиберДеревня">
+          <div class="case-title">КиберДеревня</div>
+          <div class="case-price">150 ⭐️</div>
+          <button class="btn" style="background: var(--mythic-color); color: #000;" onclick="openCase('season')">Открыть</button>
+        </div>
+      </div>
+    </section>
 
-        // Функция генерации талона
-        function generateTicket(title, price) {
-            const ticketOutput = document.getElementById('ticketOutput');
-            const ticketInfo = document.getElementById('ticketInfo');
-            
-            // Генерируем случайный ID талона для реалистичности
-            const ticketId = Math.floor(100000 + Math.random() * 900000);
-            
-            ticketInfo.innerHTML = `
-                <strong>Номер талона:</strong> #${ticketId}<br>
-                <strong>Услуга:</strong> Буст [${title}]<br>
-                <strong>Стоимость:</strong> ${price}<br>
-                <strong>Тип сделки:</strong> Предоплата 50% перед началом
-            `;
-            
-            // Показываем талон и плавно скроллим к нему
-            ticketOutput.style.display = 'block';
-            ticketOutput.scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
+    <!-- 2. КРАФТ -->
+    <section id="craft-tab" class="tab-content">
+      <h2>Алтарь Крафта</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Смешайте 3 подходящих предмета для создания Ультра-Легендарки</p>
+      
+      <div class="craft-slots">
+        <div class="craft-slot" onclick="selectCraftIngredient(0)" id="slot-0">+</div>
+        <div class="craft-slot" onclick="selectCraftIngredient(1)" id="slot-1">+</div>
+        <div class="craft-slot" onclick="selectCraftIngredient(2)" id="slot-2">+</div>
+      </div>
+
+      <button class="btn" id="craft-btn" style="background: var(--ultra-color); margin-bottom: 20px;" onclick="processCraft()">Смешать предметы</button>
+
+      <h3>Доступные Рецепты</h3>
+      <div class="recipes-list" id="recipes-container"></div>
+    </section>
+
+    <!-- 3. МАРКЕТ -->
+    <section id="market-tab" class="tab-content">
+      <div class="market-switch">
+        <button class="active" onclick="switchMarketSubTab('system')">Системный (2x)</button>
+        <button onclick="switchMarketSubTab('p2p')">P2P Торговля</button>
+      </div>
+      
+      <div id="system-market">
+        <div class="items-grid" id="system-market-grid"></div>
+      </div>
+      <div id="p2p-market" style="display: none;">
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Предметы от других игроков (Включая Сезонные)</p>
+        <div class="items-grid" id="p2p-market-grid"></div>
+      </div>
+    </section>
+
+    <!-- 4. ИНВЕНТАРЬ -->
+    <section id="inventory-tab" class="tab-content">
+      <h2>Мой Инвентарь</h2>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Нажмите на предмет, чтобы продать его</p>
+      <div class="items-grid" id="inventory-grid"></div>
+    </section>
+
+    <!-- 5. ТЕХПОДДЕРЖКА -->
+    <section id="support-tab" class="tab-content">
+      <h2>Техническая Поддержка</h2>
+      <div style="background: var(--card-bg); padding: 16px; border-radius: 12px; margin-top: 16px;">
+        <p style="margin-bottom: 12px; font-size: 14px;">Возникли проблемы с зачислением Telegram Stars или работой игры?</p>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Наша команда поддержки работает 24/7.</p>
+        <button class="btn" onclick="alert('Открытие диалога поддержки...')">Написать в Поддержку</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- РУЛЕТКА (АНИМАЦИЯОТКРЫТИЯ) -->
+  <div class="roulette-container" id="roulette-modal">
+    <h3 id="roulette-case-name">Открытие кейса...</h3>
+    <div class="roulette-wrapper">
+      <div class="roulette-pointer"></div>
+      <div class="roulette-track" id="roulette-track"></div>
+    </div>
+    
+    <div class="win-modal" id="win-modal">
+      <h2>Поздравляем!</h2>
+      <p style="font-size: 12px; color: var(--text-muted);">Вы выиграли:</p>
+      <img id="win-img" src="" alt="">
+      <h3 id="win-title">...</h3>
+      <div id="win-rarity" class="rarity-tag" style="margin-bottom: 12px;">...</div>
+      
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" style="background: #22c55e;" id="sell-win-btn">Продать</button>
+        <button class="btn" onclick="closeRoulette()">Забрать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- НАВИГАЦИЯ -->
+  <nav>
+    <div class="nav-item active" onclick="switchTab('cases-tab', this)">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+      Кейсы
+    </div>
+    <div class="nav-item" onclick="switchTab('craft-tab', this)">
+      <svg viewBox="0 0 24 24"><path d="M7.5 13.5L2 19l2.5 2.5L10 16m4.5-11.5L20 9l-2.5 2.5L12 6M11 11l-1 1 5 5 1-1m-7.5-6L12 8.5l1.5-1.5L10 3.5"/></svg>
+      Крафт
+    </div>
+    <div class="nav-item" onclick="switchTab('market-tab', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm0 10c-2.76 0-5-2.24-5-5h2c0 1.66 1.34 3 3 3s3-1.34 3-3h2c0 2.76-2.24 5-5 5z"/></svg>
+      Маркет
+    </div>
+    <div class="nav-item" onclick="switchTab('inventory-tab', this)">
+      <svg viewBox="0 0 24 24"><path d="M17 4h-3V2h-4v2H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM9 4h6v2H9V4z"/></svg>
+      Инвентарь
+    </div>
+    <div class="nav-item" onclick="switchTab('support-tab', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z"/></svg>
+      Помощь
+    </div>
+  </nav>
+
+  <script>
+    // --- БАЗА ДАННЫХ ПРЕДМЕТОВ С ССЫЛКАМИ НА ФОТО ---
+    const ITEMS = {
+      // 🟢 РЕДКИЕ
+      cake: { id: 'cake', title: 'Homemade Cake', rarity: 'rare', price: 20, img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&auto=format&fit=crop' },
+      wine: { id: 'wine', title: 'Spiced Wine', rarity: 'rare', price: 25, img: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=200&auto=format&fit=crop' },
+      kitten: { id: 'kitten', title: 'Cuddly Kitten', rarity: 'rare', price: 30, img: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=200&auto=format&fit=crop' },
+      balloons: { id: 'balloons', title: 'Cheerful Balloons', rarity: 'rare', price: 15, img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=200&auto=format&fit=crop' },
+      
+      // 🔵 СВЕРХРЕДКИЕ
+      peach: { id: 'peach', title: 'Precious Peach', rarity: 'super-rare', price: 50, img: 'https://images.unsplash.com/photo-1641898378335-ee1476d0e653?w=200&auto=format&fit=crop' },
+      potion: { id: 'potion', title: 'Magic Potion', rarity: 'super-rare', price: 60, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=200&auto=format&fit=crop' },
+      samovar: { id: 'samovar', title: 'Робо-самовар «Кулибин-3»', rarity: 'super-rare', price: 80, isSeason: true, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&auto=format&fit=crop' },
+      
+      // 🟣 ЭПИЧЕСКИЕ
+      duck: { id: 'duck', title: 'Cyber Duck', rarity: 'epic', price: 150, img: 'https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?w=200&auto=format&fit=crop' },
+      crown: { id: 'crown', title: 'Neon Crown', rarity: 'epic', price: 200, img: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=200&auto=format&fit=crop' },
+      pepe: { id: 'pepe', title: 'Plush Pepe', rarity: 'epic', price: 180, img: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&auto=format&fit=crop' },
+      oscar: { id: 'oscar', title: 'Mini Oscar', rarity: 'epic', price: 220, img: 'https://images.unsplash.com/photo-1578269174936-2709b6aeb913?w=200&auto=format&fit=crop' },
+      scroll: { id: 'scroll', title: 'Ancient Scroll', rarity: 'epic', price: 170, img: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=200&auto=format&fit=crop' },
+      crystal: { id: 'crystal', title: 'Mystic Crystal', rarity: 'epic', price: 190, img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&auto=format&fit=crop' },
+      rocket: { id: 'rocket', title: 'Flying Rocket', rarity: 'epic', price: 250, img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=200&auto=format&fit=crop' },
+      throne: { id: 'throne', title: 'Royal Throne', rarity: 'epic', price: 230, img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&auto=format&fit=crop' },
+      uaz: { id: 'uaz', title: 'Летающая буханка «УАЗ-Марс»', rarity: 'epic', price: 300, isSeason: true, img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&auto=format&fit=crop' },
+
+      // 🟡 МИФИЧЕСКИЕ
+      pegasus_wing: { id: 'pegasus_wing', title: 'Pegasus Wing', rarity: 'mythic', price: 500, img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=200&auto=format&fit=crop' },
+      glasha: { id: 'glasha', title: 'Дрон-поводырь «Глаша»', rarity: 'mythic', price: 600, isSeason: true, img: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=200&auto=format&fit=crop' },
+      hourglass: { id: 'hourglass', title: 'Time Hourglass', rarity: 'mythic', price: 550, img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=200&auto=format&fit=crop' },
+      dragon: { id: 'dragon', title: 'Volcanic Dragon', rarity: 'mythic', price: 700, img: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=200&auto=format&fit=crop' },
+      aurora: { id: 'aurora', title: 'Aurora Borealis', rarity: 'mythic', price: 650, img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=200&auto=format&fit=crop' },
+      lotus: { id: 'lotus', title: 'Sacred Lotus', rarity: 'mythic', price: 580, img: 'https://images.unsplash.com/photo-1508615070457-7ba34003ab59?w=200&auto=format&fit=crop' },
+      globe: { id: 'globe', title: 'Galaxy Globe', rarity: 'mythic', price: 720, img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=200&auto=format&fit=crop' },
+      cyber_heart: { id: 'cyber_heart', title: 'Cybernetic Heart', rarity: 'mythic', price: 680, img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop' },
+
+      // 🔴 ЛЕГЕНДАРНЫЕ
+      belarus: { id: 'belarus', title: 'Трактор «Беларус-9000»', rarity: 'legendary', price: 1800, isSeason: true, img: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=200&auto=format&fit=crop' },
+      tg_crown: { id: 'tg_crown', title: 'Golden Crown of TG', rarity: 'legendary', price: 1700, img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=200&auto=format&fit=crop' },
+      flame: { id: 'flame', title: 'Eternal Flame', rarity: 'legendary', price: 1500, img: 'https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=200&auto=format&fit=crop' },
+      ton_matrix: { id: 'ton_matrix', title: 'TON Crystal Matrix', rarity: 'legendary', price: 2000, img: 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1bd?w=200&auto=format&fit=crop' },
+      node: { id: 'node', title: 'Blockchain Node', rarity: 'legendary', price: 1600, img: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200&auto=format&fit=crop' },
+      cube: { id: 'cube', title: 'Genesis Cube', rarity: 'legendary', price: 2200, img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop' },
+      black_hole: { id: 'black_hole', title: 'Генератор Черных Дыр', rarity: 'legendary', price: 2500, isSeason: true, img: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=200&auto=format&fit=crop' },
+
+      // 🌈 УЛЬТРА-ЛЕГЕНДАРНЫЕ (КРАФТ)
+      space_still_life: { id: 'space_still_life', title: 'Космический Натюрморт', rarity: 'ultra', price: 5000, img: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=200&auto=format&fit=crop' },
+      cat_bayun: { id: 'cat_bayun', title: 'Кот-Баюн AI', rarity: 'ultra', price: 5500, img: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&auto=format&fit=crop' },
+      king_pegasus: { id: 'king_pegasus', title: 'Король Пегас', rarity: 'ultra', price: 6000, img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=200&auto=format&fit=crop' },
+      pepe_oscar: { id: 'pepe_oscar', title: 'Кинокефир Pepe', rarity: 'ultra', price: 6500, img: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&auto=format&fit=crop' },
+      chronograph: { id: 'chronograph', title: 'Хронограф Блокчейна', rarity: 'ultra', price: 7000, img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=200&auto=format&fit=crop' },
+      kolkhoz_express: { id: 'kolkhoz_express', title: 'Экспресс «Колхоз»', rarity: 'ultra', price: 8000, img: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=200&auto=format&fit=crop' },
+      net_emperor: { id: 'net_emperor', title: 'Император Сети', rarity: 'ultra', price: 8500, img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&auto=format&fit=crop' },
+      aurora_dragon: { id: 'aurora_dragon', title: 'Дракон Полярного Сияния', rarity: 'ultra', price: 9000, img: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=200&auto=format&fit=crop' },
+      lotus_consensus: { id: 'lotus_consensus', title: 'Лотос Консенсуса', rarity: 'ultra', price: 9500, img: 'https://images.unsplash.com/photo-1508615070457-7ba34003ab59?w=200&auto=format&fit=crop' },
+      village_singularity: { id: 'village_singularity', title: 'Сингулярность «Деревня»', rarity: 'ultra', price: 10000, img: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=200&auto=format&fit=crop' }
+    };
+
+    // --- РЕЦЕПТЫ КРАФТА (10 шт) ---
+    const CRAFT_RECIPES = [
+      { res: 'space_still_life', req: ['cake', 'wine', 'peach'] },
+      { res: 'cat_bayun', req: ['kitten', 'potion', 'samovar'] },
+      { res: 'king_pegasus', req: ['duck', 'crown', 'pegasus_wing'] },
+      { res: 'pepe_oscar', req: ['pepe', 'oscar', 'glasha'] },
+      { res: 'chronograph', req: ['scroll', 'crystal', 'hourglass'] },
+      { res: 'kolkhoz_express', req: ['rocket', 'uaz', 'belarus'] },
+      { res: 'net_emperor', req: ['throne', 'cyber_heart', 'tg_crown'] },
+      { res: 'aurora_dragon', req: ['dragon', 'aurora', 'flame'] },
+      { res: 'lotus_consensus', req: ['lotus', 'ton_matrix', 'node'] },
+      { res: 'village_singularity', req: ['globe', 'cube', 'black_hole'] }
+    ];
+
+    // --- СОСТОЯНИЕ ИГРЫ ---
+    let userState = {
+      balance: 350,
+      inventory: [] // Массив инстансов предметов
+    };
+
+    let selectedCraftSlots = [null, null, null];
+    let lastWonItem = null;
+
+    // ИНИЦИАЛИЗАЦИЯ
+    window.onload = () => {
+      renderInventory();
+      renderRecipes();
+      renderMarket();
+    };
+
+    function updateBalance(amount) {
+      userState.balance += amount;
+      document.getElementById('balance-val').innerText = userState.balance;
+    }
+
+    // --- НАВИГАЦИЯ ---
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // --- РУЛЕТКА OПЕНИНГА (CS-STYLE) ---
+    const CASES = {
+      beginner: { name: 'Кейс Новичка', cost: 50, pool: ['cake', 'wine', 'kitten', 'balloons', 'peach', 'potion'] },
+      standard: { name: 'Стандартный кейс', cost: 100, pool: ['balloons', 'peach', 'potion', 'duck', 'crown', 'pepe'] },
+      dubai: { name: 'Дубайский кейс', cost: 250, pool: ['duck', 'crown', 'pegasus_wing', 'tg_crown', 'ton_matrix'] },
+      season: { name: 'КиберДеревня', cost: 150, pool: ['samovar', 'uaz', 'glasha', 'belarus', 'black_hole'] }
+    };
+
+    function openCase(type) {
+      const c = CASES[type];
+      if (userState.balance < c.cost) {
+        alert('Недостаточно Stars!');
+        return;
+      }
+      updateBalance(-c.cost);
+
+      // Генерируем победный предмет из пула
+      const winKey = c.pool[Math.floor(Math.random() * c.pool.length)];
+      lastWonItem = ITEMS[winKey];
+
+      // Показываем модалку рулетки
+      document.getElementById('roulette-case-name').innerText = c.name;
+      const modal = document.getElementById('roulette-modal');
+      const track = document.getElementById('roulette-track');
+      const winModal = document.getElementById('win-modal');
+      
+      modal.style.display = 'flex';
+      winModal.style.display = 'none';
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(0px)';
+
+      // Генерируем ~45 рулеточных элементов
+      track.innerHTML = '';
+      for (let i = 0; i < 45; i++) {
+        const randKey = c.pool[Math.floor(Math.random() * c.pool.length)];
+        const item = (i === 40) ? lastWonItem : ITEMS[randKey]; // 40-й элемент - выигрыш
+        
+        const el = document.createElement('div');
+        el.className = `roulette-item ${item.rarity}`;
+        el.innerHTML = `<img src="${item.img}"><div class="name">${item.title}</div>`;
+        track.appendChild(el);
+      }
+
+      // Запуск анимации прокрутки
+      setTimeout(() => {
+        // Смещение до 40-го элемента с амортизацией
+        const itemWidth = 108; // 100px + 8px margin
+        const targetOffset = -(40 * itemWidth - (window.innerWidth / 2) + 50);
+        track.style.transition = 'transform 5s cubic-bezier(0.1, 1, 0.1, 1)';
+        track.style.transform = `translateX(${targetOffset}px)`;
+      }, 50);
+
+      // Окончание прокрутки
+      setTimeout(() => {
+        document.getElementById('win-img').src = lastWonItem.img;
+        document.getElementById('win-title').innerText = lastWonItem.title;
+        document.getElementById('win-rarity').innerText = lastWonItem.rarity.toUpperCase();
+        document.getElementById('sell-win-btn').innerText = `Продать за ${lastWonItem.price} ⭐️`;
+        document.getElementById('sell-win-btn').onclick = () => {
+          updateBalance(lastWonItem.price);
+          closeRoulette();
+        };
+
+        // Сохраняем в инвентарь
+        userState.inventory.push({ ...lastWonItem, uid: Date.now() });
+        renderInventory();
+
+        winModal.style.display = 'block';
+      }, 5200);
+    }
+
+    function closeRoulette() {
+      document.getElementById('roulette-modal').style.display = 'none';
+    }
+
+    // --- ИНВЕНТАРЬ ---
+    function renderInventory() {
+      const grid = document.getElementById('inventory-grid');
+      grid.innerHTML = '';
+      
+      userState.inventory.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = `item-card ${item.rarity}`;
+        card.innerHTML = `
+          <img src="${item.img}">
+          <div class="title">${item.title}</div>
+          <div class="rarity-tag">${item.price} ⭐️</div>
+        `;
+        card.onclick = () => sellInventoryItem(index);
+        grid.appendChild(card);
+      });
+    }
+
+    function sellInventoryItem(index) {
+      const item = userState.inventory[index];
+      if (confirm(`Продать "${item.title}" за ${item.price} ⭐️?`)) {
+        updateBalance(item.price);
+        userState.inventory.splice(index, 1);
+        renderInventory();
+      }
+    }
+
+    // --- КРАФТ ---
+    function renderRecipes() {
+      const container = document.getElementById('recipes-container');
+      container.innerHTML = '';
+      CRAFT_RECIPES.forEach(r => {
+        const res = ITEMS[r.res];
+        const reqs = r.req.map(k => ITEMS[k].title).join(' + ');
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.innerHTML = `<b>${res.title}</b><br><span style="color:var(--text-muted)">Нужно: ${reqs}</span>`;
+        container.appendChild(card);
+      });
+    }
+
+    function selectCraftIngredient(slotIdx) {
+      if (userState.inventory.length === 0) {
+        alert('Инвентарь пуст!');
+        return;
+      }
+      // Ближайший подходящий предмет для наглядности
+      const item = userState.inventory[slotIdx % userState.inventory.length];
+      selectedCraftSlots[slotIdx] = item;
+      
+      const slotEl = document.getElementById(`slot-${slotIdx}`);
+      slotEl.innerHTML = `<img src="${item.img}">`;
+    }
+
+    function processCraft() {
+      if (selectedCraftSlots.includes(null)) {
+        alert('Выберите 3 предмета в слоты!');
+        return;
+      }
+
+      // Проверка рецепта
+      const currentIds = selectedCraftSlots.map(s => s.id).sort();
+      const match = CRAFT_RECIPES.find(r => {
+        const reqSorted = [...r.req].sort();
+        return JSON.stringify(reqSorted) === JSON.stringify(currentIds);
+      });
+
+      if (match) {
+        const resultItem = ITEMS[match.res];
+        alert(`🎉 КРАФТ УСПЕШЕН! Вы получили: ${resultItem.title}`);
+        
+        // Удаляем ингредиенты
+        selectedCraftSlots.forEach(s => {
+          const idx = userState.inventory.findIndex(i => i.uid === s.uid);
+          if (idx !== -1) userState.inventory.splice(idx, 1);
+        });
+
+        // Добавляем результат
+        userState.inventory.push({ ...resultItem, uid: Date.now() });
+        
+        // Сброс слотов
+        selectedCraftSlots = [null, null, null];
+        for(let i=0; i<3; i++) document.getElementById(`slot-${i}`).innerText = '+';
+        
+        renderInventory();
+      } else {
+        alert('❌ Неизвестная комбинация! Предметы не совпадают ни с одним рецептом.');
+      }
+    }
+
+    // --- МАРКЕТПЛЕЙС ---
+    function switchMarketSubTab(type) {
+      const btns = document.querySelectorAll('.market-switch button');
+      btns.forEach(b => b.classList.remove('active'));
+      
+      if (type === 'system') {
+        btns[0].classList.add('active');
+        document.getElementById('system-market').style.display = 'block';
+        document.getElementById('p2p-market').style.display = 'none';
+      } else {
+        btns[1].classList.add('active');
+        document.getElementById('system-market').style.display = 'none';
+        document.getElementById('p2p-market').style.display = 'block';
+      }
+    }
+
+    function renderMarket() {
+      const sysGrid = document.getElementById('system-market-grid');
+      const p2pGrid = document.getElementById('p2p-market-grid');
+      sysGrid.innerHTML = '';
+      p2pGrid.innerHTML = '';
+
+      // Системный маркет (Без сезонных и Ультра!)
+      Object.values(ITEMS).filter(i => !i.isSeason && i.rarity !== 'ultra').forEach(item => {
+        const buyPrice = item.price * 2;
+        const card = document.createElement('div');
+        card.className = `item-card ${item.rarity}`;
+        card.innerHTML = `
+          <img src="${item.img}">
+          <div class="title">${item.title}</div>
+          <button class="btn" style="padding:4px; font-size:10px; margin-top:4px;" onclick="buySystemItem('${item.id}')">${buyPrice} ⭐️</button>
+        `;
+        sysGrid.appendChild(card);
+      });
+
+      // Имитация P2P маркета (С сезонками)
+      const p2pItems = [ITEMS.belarus, ITEMS.uaz, ITEMS.glasha, ITEMS.samovar];
+      p2pItems.forEach(item => {
+        const p2pPrice = Math.floor(item.price * 1.5);
+        const card = document.createElement('div');
+        card.className = `item-card ${item.rarity}`;
+        card.innerHTML = `
+          <img src="${item.img}">
+          <div class="title">${item.title}</div>
+          <div style="font-size:8px; color:var(--text-muted)">Игрок: @trader3000</div>
+          <button class="btn" style="padding:4px; font-size:10px; margin-top:4px; background:#eab308; color:#000;" onclick="buyP2PItem('${item.id}', ${p2pPrice})">${p2pPrice} ⭐️</button>
+        `;
+        p2pGrid.appendChild(card);
+      });
+    }
+
+    function buySystemItem(id) {
+      const item = ITEMS[id];
+      const price = item.price * 2;
+      if (userState.balance < price) {
+        alert('Недостаточно Stars!');
+        return;
+      }
+      updateBalance(-price);
+      userState.inventory.push({ ...item, uid: Date.now() });
+      renderInventory();
+      alert(`Вы успешно купили ${item.title}`);
+    }
+
+    function buyP2PItem(id, price) {
+      const item = ITEMS[id];
+      if (userState.balance < price) {
+        alert('Недостаточно Stars!');
+        return;
+      }
+      updateBalance(-price);
+      userState.inventory.push({ ...item, uid: Date.now() });
+      renderInventory();
+      alert(`Вы успешно купили ${item.title} у другого игрока!`);
+    }
+  </script>
 </body>
 </html>
